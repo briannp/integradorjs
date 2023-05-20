@@ -81,18 +81,21 @@ class Carrito {
      * función que agrega @{cantidad} de productos con @{sku} al carrito
      */
     async agregarProducto(sku, cantidad) {
-        console.log(`Agregando ${cantidad} ${sku}`);
+        //console.log(`Agregando ${cantidad} ${sku}`);
 
         // Busco el producto en la "base de datos"
-        const producto = await findProductBySku(sku);
-
-        console.log("Producto encontrado", producto);
-
-        // Creo un producto nuevo
-        const nuevoProducto = new ProductoEnCarrito(sku, producto.nombre, cantidad);
-        this.productos.push(nuevoProducto);
-        this.precioTotal = this.precioTotal + (producto.precio * cantidad);
-        this.categorias.push(producto.categoria);
+       
+        const producto = findProductBySku(sku);
+        producto.then(
+             response => {
+                const nuevoProducto = new ProductoEnCarrito(sku, response.nombre, cantidad)
+                this.productos.push(nuevoProducto);
+                this.precioTotal = this.precioTotal + (response.precio * cantidad);
+                this.categorias.push(response.categoria);
+            },error =>{
+                console.log(error);
+            }
+        )
     }
 }
 
@@ -126,5 +129,6 @@ function findProductBySku(sku) {
 
 const carrito = new Carrito();
 carrito.agregarProducto('WE328NJ', 2);
-Tarea2_EjercicioIntegrador.js
-Mostrando Tarea2_EjercicioIntegrador.js
+carrito.agregarProducto('FKJASDIJQJWD', 2);
+
+console.log(carrito);
