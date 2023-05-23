@@ -93,9 +93,14 @@ class Carrito {
     const producto = findProductBySku(sku);
     producto.then(
       (response) => {
-        let validarProducto = this.validarProducto(sku);
-        if (validarProducto === producto) {
-          this.productos.cantidad = this.productos.cantidad + response.cantidad;
+        let productoChequeado = this.checkInCart(sku);
+
+        if (productoChequeado === sku) {
+          const productoCargado = this.productos.find(
+            (productos) => productos.sku === sku
+          );
+
+          productoCargado.cantidad += cantidad;
         } else {
           const nuevoProducto = new ProductoEnCarrito(
             sku,
@@ -103,7 +108,7 @@ class Carrito {
             cantidad
           );
           this.productos.push(nuevoProducto);
-          this.precioTotal = this.precioTotal + response.precio * cantidad;
+          this.precioTotal += response.precio * cantidad;
           this.categorias.push(response.categoria);
         }
       },
@@ -113,15 +118,33 @@ class Carrito {
     );
   }
 
-  validarProducto(sku) {
-    let productoValidado = null;
+  eliminarProducto(sku, cantidad){
 
-    this.productos.map((productos) => {
+    const productoAeliminar = this.checkInCart(sku);
+
+    console.log(productoAeliminar);
+
+    if(productoAeliminar.cantidad < cantidad){
+        this.productos.cantidad -= cantidad;
+        console.log("Se eliminaron " + cantidad + " productos del articulo " + sku + ".");
+    } else if (this.productos.cantidad >= cantidad) {
+        const index = this.productos.indexOf(sku);
+        this.productos.splice(index);
+        console.log("Se elimino el articulo " + sku + " del carrito");
+    } else {
+        console.log("No hay articulos que coincidan con " + sku + ".");
+    }
+  }
+
+  checkInCart(sku) {
+    let productCheck = null;
+
+    this.productos.find((productos) => {
       if (productos.sku === sku) {
-        productoValidado = sku;
+        productCheck = sku;
       }
     });
-    return productoValidado;
+    return productCheck;
   }
 }
 
@@ -157,5 +180,9 @@ function findProductBySku(sku) {
 const carrito = new Carrito();
 carrito.agregarProducto("WE328NJ", 2);
 carrito.agregarProducto("WE328NJ", 5);
-
 console.log(carrito);
+carrito.agregarProducto("pepepasdasd", 10);
+console.log(carrito);
+carrito.eliminarProducto("WE328NJ", 2);
+console.log(carrito);
+
